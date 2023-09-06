@@ -1,6 +1,7 @@
 import ee
 import json
 import datetime
+import csv
 
 service_account = 'ucl-676@ee-96juancg.iam.gserviceaccount.com'
 credentials = ee.ServiceAccountCredentials(service_account, 'ee-96juancg-5fded826f6f1.json')
@@ -75,3 +76,20 @@ for location in locations:
     monthly_NDVI_collection = monthly_NDVI_collection.set({'name': location['name']})
     
     collections.append(monthly_NDVI_collection)
+
+
+# Save FPAR from MOD15
+csv_filename = "ndvi.csv"
+with open(csv_filename, mode='w', newline='') as csv_file:
+    fieldnames = ["name","year", "month", "ndvi"]
+    writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+    writer.writeheader()
+    for col in collections:
+        data = col.getInfo()
+        name = data['properties']['name']
+        for img in data['features']:
+            date = datetime.datetime.fromtimestamp(img['properties']['system:time_start'] / 1000)
+            year = date.year
+            month = date.month
+            fpar = img['properties']['median'] 
+            writer.writerow({"name": name, "year": year, "month": month, "ndvi": fpar})
