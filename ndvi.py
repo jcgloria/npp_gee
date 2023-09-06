@@ -35,7 +35,6 @@ def print_sample():
         for date, median in zip(dates, medians):
             print(f"Date: {date}, Median: {median}")
             medians.append(median)
-    
     print("-------------------")
     print(sum(medians)/len(medians))
 

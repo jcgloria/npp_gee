@@ -26,7 +26,3 @@ multiselect1 = app.multiselect(
 
 text_1 = app.text(value='Enter text', name="text input 1")
 
-
-
-select1 = app.select(name="First selector", options=["a", "b", "c"], default="a")
-
