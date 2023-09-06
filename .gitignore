@@ -1,0 +1,14 @@
+#OSX
+.DS_Store
+
+# virtual env
+.venv
+
+# credentials
+ee*.json
+
+# sdk
+google-cloud-sdk
+
+#python
+__pycache__

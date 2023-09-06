@@ -1,0 +1,26 @@
+{
+    "locations": [
+        {
+            "name": "Sundarbans",
+            "lat": 21.9497,
+            "lon": 89.1833
+        },
+        {
+            "name": "Everglades",
+            "lat": 25.2867,
+            "lon": -80.8987
+        },
+        {
+            "name": "Cairns",
+            "lat": -16.9386,
+            "lon": 145.8481
+        },
+        {
+            "name": "CanGio",
+            "lat": 10.4807,
+            "lon": 106.8672
+        }
+    ],
+    "year_start": 2014,
+    "year_end": 2019
+}
