@@ -18,25 +18,12 @@ def aggregate_monthly_NDVI(year_month):
 
     return monthly_mean.set({
         'system:time_start': start_date.millis(),
-        'median': monthly_mean.reduceRegion(ee.Reducer.median(), geometry=area, scale=500).get('monthly_NDVI') # for debugging purposes
+        'mean': monthly_mean.reduceRegion(ee.Reducer.mean(), geometry=area, scale=500).get('monthly_NDVI') # for debugging purposes
     })
 
 def addNDVI(image):
     ndvi = image.normalizedDifference(['sur_refl_b02', 'sur_refl_b01']).rename('NDVI')
     return image.addBands(ndvi)
-
-def print_sample():
-    medians = []
-    # get some sample data from the first collection.
-    for i,col in enumerate(collections):
-        dates = col.aggregate_array('system:time_start').map(lambda millis: ee.Date(millis).format('YYYY-MM-dd')).getInfo()
-        medians = col.aggregate_array('median').getInfo()
-        print('Collection ' + str(i))
-        for date, median in zip(dates, medians):
-            print(f"Date: {date}, Median: {median}")
-            medians.append(median)
-    print("-------------------")
-    print(sum(medians)/len(medians))
 
 def convertToReadable(timestamp):
     return datetime.datetime.fromtimestamp(timestamp/1000).strftime('%Y-%m-%d')
@@ -76,19 +63,17 @@ for location in locations:
     
     collections.append(monthly_NDVI_collection)
 
-
-# Save FPAR from MOD15
-csv_filename = "ndvi.csv"
-with open(csv_filename, mode='w', newline='') as csv_file:
-    fieldnames = ["name","year", "month", "ndvi"]
-    writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
-    writer.writeheader()
-    for col in collections:
-        data = col.getInfo()
-        name = data['properties']['name']
-        for img in data['features']:
-            date = datetime.datetime.fromtimestamp(img['properties']['system:time_start'] / 1000)
-            year = date.year
-            month = date.month
-            fpar = img['properties']['median'] 
-            writer.writerow({"name": name, "year": year, "month": month, "ndvi": fpar})
+# csv_filename = "ndvi.csv"
+# with open(csv_filename, mode='w', newline='') as csv_file:
+#     fieldnames = ["name","year", "month", "ndvi"]
+#     writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+#     writer.writeheader()
+#     for col in collections:
+#         data = col.getInfo()
+#         name = data['properties']['name']
+#         for img in data['features']:
+#             date = datetime.datetime.fromtimestamp(img['properties']['system:time_start'] / 1000)
+#             year = date.year
+#             month = date.month
+#             ndvi = img['properties']['mean'] 
+#             writer.writerow({"name": name, "year": year, "month": month, "ndvi": ndvi})

@@ -51,7 +51,7 @@ for data in all_data:
 # Save the NPP data to a CSV file
 csv_filename = "npp_gee_data.csv"
 with open(csv_filename, mode='w', newline='') as csv_file:
-    fieldnames = ["year", "location", "mean_npp", "total_carbon"]
+    fieldnames = ["year", "location", "mean_npp", "carbon"]
     writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
     writer.writeheader()
     for data in all_data:

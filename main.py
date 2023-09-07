@@ -46,12 +46,11 @@ for loc in locations:
         par_collection = par.get_collection(loc['name'])
         lue_collection = lue.get_collection(loc['name'])
         result_collection = ndvi_collection.map(multiply_bands) # Use NDVI collection as a base
-        
-
         monthly_npp = result_collection.aggregate_array('mean_NPP').getInfo() 
         monthly_carbon = result_collection.aggregate_array('total_carbon').getInfo() 
         for i in range(0, len(monthly_npp)):
             npp_data.append({"year": year, "month": i + 1, "location": loc['name'], "npp": monthly_npp[i], "carbon": monthly_carbon[i]})
+            print(f"Year: {year}, Month: {i + 1}, Location: {loc['name']}, NPP: {monthly_npp[i]}, Carbon: {monthly_carbon[i]}")
 
 # Save the NPP data to a CSV file
 #csv_filename = "npp_own_data.csv"

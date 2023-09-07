@@ -23,7 +23,7 @@ def aggregate_monthly_FPAR(year_month):
 
     return monthly_mean.set({
         'system:time_start': start_date.millis(),
-        'median': monthly_mean.reduceRegion(ee.Reducer.median(), geometry=area, scale=500).get('monthly_FPAR') # for debugging purposes
+        'mean': monthly_mean.reduceRegion(ee.Reducer.mean(), geometry=area, scale=500).get('monthly_FPAR') # for debugging purposes
     })
 
 collections = []
@@ -53,5 +53,5 @@ with open(csv_filename, mode='w', newline='') as csv_file:
             date = datetime.datetime.fromtimestamp(img['properties']['system:time_start'] / 1000)
             year = date.year
             month = date.month
-            fpar = img['properties']['median'] * 0.01
+            fpar = img['properties']['mean'] * 0.01
             writer.writerow({"name": name, "year": year, "month": month, "fpar": fpar})

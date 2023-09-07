@@ -40,11 +40,6 @@ def aggregate_monthly_PAR(year_month):
 
     return monthly_sum.set('system:time_start', start_date.millis()).set('median', median)
 
-def print_sample():
-    means = daily_collection.aggregate_array('mean').getInfo()
-    print(f"Location: {loc['name']}")
-    print(f"Mean PAR: {sum(means)/len(means)}")
-
 def get_collection(name):
     for collection in collections:
         col_name = collection.get('name').getInfo()

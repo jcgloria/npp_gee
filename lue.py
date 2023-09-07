@@ -1,6 +1,8 @@
 import ee
 import json
 import ndvi
+import csv
+import datetime
 
 service_account = 'ucl-676@ee-96juancg.iam.gserviceaccount.com'
 credentials = ee.ServiceAccountCredentials(service_account, 'ee-96juancg-5fded826f6f1.json')
@@ -38,37 +40,25 @@ def calculate_LUE(image):
     # mean temperature right now
     t = t_collection_monthly.filterMetadata('system:time_start', 'equals', image.date().millis()).first().select('mean_2m_air_temperature').subtract(273.15) # convert to C
     # T_1 calculation
-    result_t_1 = t_opt.multiply(0.02).add(0.8).subtract(t_opt.pow(2).multiply(0.0005))
+    result_t_1 = t_opt.multiply(0.02).add(0.8).subtract(t_opt.pow(2).multiply(0.0005)) 
     # T_2 calculation
-    t_2_numerator_1 = ee.Image.constant(1.1814)
-    t_2_exponent_1 = t_opt.subtract(t).subtract(10).multiply(-0.2) 
+    t_2_numerator_1 = ee.Image.constant(1.1814) 
+    t_2_exponent_1 = t_opt.subtract(t).subtract(10).multiply(0.2) 
     t_2_denominator_1 = ee.Image.constant(1).add(t_2_exponent_1.exp())
     result_t_2_1 = t_2_numerator_1.divide(t_2_denominator_1)
-    t_2_exponent_2 = t_opt.add(t).subtract(10).multiply(-0.3)
+    t_2_exponent_2 = t_opt.subtract(t).add(10).multiply(-0.3)
     t_2_denominator_2 = ee.Image.constant(1).add(t_2_exponent_2.exp())
     result_t_2_2 = ee.Image.constant(1).divide(t_2_denominator_2)
     result_t_2 = result_t_2_1.multiply(result_t_2_2)
     # Make the product a band in the image
     result = result_t_1.multiply(result_t_2).multiply(ee.Image(MAX_E)).multiply(image.select('W')).rename("LUE")
-    image = image.set('median', result.reduceRegion(ee.Reducer.median(), geometry=area, scale=500).get('LUE')) # for debugging purposes
+    image = image.set('lue_mean', result.reduceRegion(ee.Reducer.mean(), geometry=area, scale=500).get('LUE'))
+    # image = image.set('t_opt', t_opt.reduceRegion(ee.Reducer.mean(), geometry=area, scale=500).get('mean_2m_air_temperature'))
+    # image = image.set('t1', result_t_1.reduceRegion(ee.Reducer.mean(), geometry=area, scale=500).get('mean_2m_air_temperature'))
+    # image = image.set('t2', result_t_2.reduceRegion(ee.Reducer.mean(), geometry=area, scale=500).get('constant'))
+    # image = image.set('t', t.reduceRegion(ee.Reducer.mean(), geometry=area, scale=500).get('mean_2m_air_temperature'))
+    # image = image.set('w', image.select('W').reduceRegion(ee.Reducer.mean(), geometry=area, scale=500).get('W'))
     return image.addBands(result)
-
-def print_sample():
-    col = collections[0]
-    t_opt = col.aggregate_array('t_opt').getInfo()
-    t = col.aggregate_array('t').getInfo()
-    t1 = col.aggregate_array('t1').getInfo()
-    t2 = col.aggregate_array('t2').getInfo()
-    dates = col.aggregate_array('system:time_start').map(lambda millis: ee.Date(millis).format('YYYY-MM-dd')).getInfo()
-    medians = col.aggregate_array('median').getInfo()
-    for i in range(len(t_opt)):
-        print(f"Date: {dates[i]}")
-        print(f"t_opt: {t_opt[i]}")
-        print(f"t: {t[i]}")
-        print(f"t1: {t1[i]}")
-        print(f"t2: {t2[i]}")
-        print(f"median: {medians[i]}")
-        print("")
 
 def get_collection(name):
     for collection in collections:
@@ -78,7 +68,7 @@ def get_collection(name):
 
 inputData = json.loads(open('inputData.json', 'r').read())
 collections = []
-MAX_E = 2.5
+MAX_E = 0.389
 
 for location in inputData['locations']:
     
@@ -103,4 +93,23 @@ for location in inputData['locations']:
     collections.append(image_monthly_with_LUE)
     print(f"Finished processing {location['name']}")
 
-print_sample()
+
+# csv_filename = "lue.csv"
+# with open(csv_filename, mode='w', newline='') as csv_file:
+#     fieldnames = ["name","year", "month", "lue", "t_opt", "t1", "t2", "t", "W"]
+#     writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+#     writer.writeheader()
+#     for col in collections:
+#         data = col.getInfo()
+#         name = data['properties']['name']
+#         for img in data['features']:
+#             date = datetime.datetime.fromtimestamp(img['properties']['system:time_start'] / 1000)
+#             year = date.year
+#             month = date.month
+#             lue = img['properties']['lue_mean']
+#             t_opt = img['properties']['t_opt']
+#             t1 = img['properties']['t1']
+#             t2 = img['properties']['t2']
+#             t = img['properties']['t']
+#             w = img['properties']['w']
+#             writer.writerow({"name": name, "year": year, "month": month, "lue": lue, "t_opt": t_opt, "t1": t1, "t2": t2, "t": t, "W": w})
