@@ -32,4 +32,3 @@ for year in range(2014, 2019):
     
     # Show the plot
     plt.show()
-

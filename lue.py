@@ -91,7 +91,6 @@ for location in inputData['locations']:
 
     image_monthly_with_LUE = image_monthly_with_LUE.set({'name': location['name']})
     collections.append(image_monthly_with_LUE)
-    print(f"Finished processing {location['name']}")
 
 
 # csv_filename = "lue.csv"
