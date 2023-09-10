@@ -1,5 +1,7 @@
 import ee
 import json
+import csv
+import datetime
 
 service_account = 'ucl-676@ee-96juancg.iam.gserviceaccount.com'
 credentials = ee.ServiceAccountCredentials(service_account, 'ee-96juancg-5fded826f6f1.json')
@@ -35,10 +37,10 @@ def aggregate_monthly_PAR(year_month):
     # Sum the daily PAR values to get the monthly PAR for each pixel
     monthly_sum = filtered.select('daily_PAR').sum().rename('monthly_PAR')
 
-    # get the median and store it as a property (for debugging purposes)
-    median = monthly_sum.reduceRegion(reducer=ee.Reducer.median(), geometry=area, scale=500).get('monthly_PAR')
+    # get the mean and store it as a property
+    mean = monthly_sum.reduceRegion(reducer=ee.Reducer.mean(), geometry=area, scale=500).get('monthly_PAR')
 
-    return monthly_sum.set('system:time_start', start_date.millis()).set('median', median)
+    return monthly_sum.set('system:time_start', start_date.millis()).set('monthly_PAR', mean)
 
 def get_collection(name):
     for collection in collections:
@@ -74,3 +76,18 @@ for loc in inputData['locations']:
 
     monthly_collection = monthly_collection.set({'name': loc['name']})
     collections.append(monthly_collection)
+
+csv_filename = "par.csv"
+with open(csv_filename, mode='w', newline='') as csv_file:
+    fieldnames = ["name","year", "month", "par"]
+    writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+    writer.writeheader()
+    for col in collections:
+        data = col.getInfo()
+        name = data['properties']['name']
+        for img in data['features']:
+            date = datetime.datetime.fromtimestamp(img['properties']['system:time_start'] / 1000)
+            year = date.year
+            month = date.month
+            par = img['properties']['monthly_PAR'] 
+            writer.writerow({"name": name, "year": year, "month": month, "par": par})
