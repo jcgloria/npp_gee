@@ -9,6 +9,6 @@ This application uses satellite imagery available in Google Earth Engine to calc
 - `par.py` calculates the Photosynthetically Active Radiation
 - `main.py` calculates the Net Primary Productivity using the product of the above three scripts
   
-<img width="516" alt="ucl_app" src="https://github.com/jcgloria/npp_gee/assets/30906750/5d3ee9e7-9b17-4307-bf6a-2cad75d3217b">
+<img alt="ucl_app" src="https://github.com/jcgloria/npp_gee/assets/30906750/5d3ee9e7-9b17-4307-bf6a-2cad75d3217b">
 
 This application is part of a dissertation project required by the MSc Emerging Digital Technologies programme in UCL. 
